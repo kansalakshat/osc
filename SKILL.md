@@ -20,7 +20,8 @@ triggers:
 picks, a verified PR drafted on their fork and paused for confirmation.
 
 Nothing is pushed, opened, claimed, or commented without the user saying so.
-One exception: fixes to an already open PR (Step 10) are pushed without asking.
+Two exceptions: fixes to an already open PR (Step 10) are pushed without asking,
+and `@coderabbitai review` is posted without asking when the bot didn't run (Step 9).
 
 ## Commands the user can say
 
@@ -63,7 +64,8 @@ Establish and report:
    projects) require being assigned before working. Note the exact rule.
 4. **PR template:** read it verbatim. Also check `.github/PULL_REQUEST_TEMPLATE/`
    and, if the repo has none, the org-level `OWNER/.github` repo. Note any
-   format CONTRIBUTING sets for PR text or comments.
+   format CONTRIBUTING sets for PR text or comments. Note whether the repo uses
+   CodeRabbit (`.coderabbit.yaml`, or `coderabbitai` reviews on recent PRs).
 5. **AI-assistance policy:** grep CONTRIBUTING, the template, and any
    AI_POLICY for `AI`, `LLM`, `generated`, `Copilot`. See "Disclosure".
 6. **Program fit:** which programs this org takes part in. Check program labels
@@ -112,6 +114,12 @@ there; ordinary bug reports are where the free work is.
 ### Source B: problems nobody filed
 
 Each hit here is higher value: no queue, nobody can take it from you.
+
+Run every check below, and for code reading walk **every** source file in the
+app (in a large repo, every file of the modules in the program's idea area),
+not a sample. Don't stop after the first few hits: a short board must mean the
+repo is clean, not that the scan stopped early. Record what was covered in the
+board's `Coverage` line.
 
 - **Failing tests on main** from the Step 1 baseline (skip flaky/network ones).
 - **Configured linters and type checkers** already in the repo's config
@@ -172,6 +180,7 @@ Save to `~/oss-boards/OWNER__REPO.md` and show it to the user:
 # Problem Board: OWNER/REPO
 Scanned: YYYY-MM-DD at <main sha> · Programs: GSoC 2027 (org), LFX (label `mentorship`)
 Rules: assignment required before PR · AI policy: <none | quote> · Baseline: 3 tests failing on main
+Coverage: A 41 open → 9 free · B 62/62 files read, lint, tests, docs links, fuzz (api.py) → 7 · C 3 stale PRs → 1 · not scanned: <what, why>
 
 | # | Problem | Source | Size | Repro | Status |
 |---|---------|--------|------|-------|--------|
@@ -341,6 +350,11 @@ can't answer the reviewer, and the PR dies.
 - Write the PR text in the project's template: keep its headings and order, and
   put content under the correct headings. Follow any format CONTRIBUTING sets.
   Link the issue with `Fixes #N` where the project uses that.
+- **Tick every other checkbox in the template.** Make each one true first: run
+  the lint/format/build/tests it names, add the screenshots it asks for, sign
+  off if it mentions DCO, link the issue. Then tick it (`- [x]`). If one can't
+  be made true (no test suite exists, say), leave it unticked and tell the user
+  why in one line. Never tick a box that isn't true.
 - **Never tick or fill an AI disclosure.** Leave it exactly as the template has
   it and tell the user it is waiting for them. See "Disclosure".
 - **Write text like a busy developer.** Match the length and tone of the merged
@@ -350,6 +364,20 @@ can't answer the reviewer, and the PR dies.
   no bullet lists when a sentence does. Same for commit messages and replies.
 - **Stop and show the user.** Open the PR only after they confirm. Then update
   the board row to `PR open <link>`.
+- **Make sure CodeRabbit ran** (if Step 0 found the repo uses it). About 5
+  minutes after opening, check:
+
+  ```bash
+  gh pr view <PR> -R OWNER/REPO --json reviews,comments \
+    --jq '[.reviews[],.comments[]|select(.author.login|startswith("coderabbitai"))|.body
+           |if test("Review skipped";"i") then "skipped" else "ran" end]|unique'
+  ```
+
+  If it prints `[]` or `["skipped"]` (draft PR, ignored branch, auto-review
+  off), post `@coderabbitai review` as a PR
+  comment yourself, without asking. If it says rate limited, wait the time it
+  gives and post once. Never post it more than once per push. Then do Step 10
+  on its findings.
 
 **Pacing:** solving in any order is fine, but keep at most 2 PRs open per repo
 at once. A wall of PRs from a new account reads as spam. Remaining items stay
@@ -417,7 +445,8 @@ area of the idea you'll apply for, then apply. Merged beats opened.
 
 Any message to a maintainer or other person (Discord, Slack, email, mailing
 list, forum, GitHub comment): put the ready-to-send draft in the chat. Never send
-it yourself. Post a GitHub comment only if the user confirms that draft. Follow
+it yourself. Post a GitHub comment only if the user confirms that draft (the
+`@coderabbitai review` trigger in Step 9 is the one exception). Follow
 any format the project sets, and write it like a busy developer (Step 9).
 
 ## Disclosure
