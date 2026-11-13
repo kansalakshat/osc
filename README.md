@@ -7,7 +7,7 @@ root cause, proposed fix, test plan and size. Pick an item by number and it
 prepares a tested PR on your fork, then waits for your go-ahead.
 
 Tuned for GSoC, LFX Mentorship, MLH Fellowship, Summer of Bitcoin, European
-Summer of Code and C4GT.
+Summer of Code, Outreachy and C4GT.
 
 ## Install
 
