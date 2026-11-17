@@ -25,7 +25,8 @@ current command doesn't name. Already read this session? Don't re-read.
 
 | User says | Read | Do |
 |---|---|---|
-| `<repo url>` | `board.md` | Steps 0-2: recon, scan, show board |
+| `<repo url>`, board file exists | none | Don't rescan. Show its header + table and the file's date; say `rescan` rebuilds it |
+| `<repo url>` (no board) or `rescan` | `board.md` | Steps 0-2: recon, scan, show board |
 | `solve N` (any order) | `solve.md` | Steps 3-9 for item N |
 | `verify N` / `more` | `board.md` "Deep triage" only | Triage item N / next ~10 unverified, update rows |
 | `status` | none | Board table; refresh each `PR open` row with `gh pr view <PR> --json state,reviewDecision` |
